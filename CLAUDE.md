@@ -6,10 +6,11 @@ this repository.
 ## Project
 
 thurkube is a Kubernetes controller built with Rust and
-kube-rs. It watches custom resources (`ClaudeCodeJob`) and
-manages the lifecycle of Claude Code agent sessions running
-as pods on a Kubernetes cluster — replacing the current Argo
-Workflows-based orchestration in thurspace.
+kube-rs. It defines 8 CRDs under `thurkube.thurbeen.eu/v1alpha1`
+(AgentJob, AgentRuntime, AgentAuth, AgentRole, AgentSkill,
+McpServer, Repository, ClusterAccess) and manages the lifecycle
+of AI agent sessions running as pods — replacing the current
+Argo Workflows-based orchestration in thurspace.
 
 ## Build & Development Commands
 
@@ -32,7 +33,32 @@ cargo nextest run --all
 
 # Run a single test
 cargo nextest run --all -E 'test(test_name)'
+
+# Architecture rules only
+cargo test --test architecture_rules
+
+# E2E tests (requires a running cluster, e.g. k3d)
+cargo run -- --crd | kubectl apply -f -
+cargo test --test e2e -- --ignored --nocapture
+
+# Print all CRD YAMLs
+cargo run -- --crd
 ```
+
+### Test structure
+
+- **Unit tests** — inline `#[cfg(test)]` in each `src/crd/*.rs`
+- **Integration tests** — `tests/` directory:
+  - `crd_schema.rs` — CRD YAML validity and schema checks
+  - `architecture_rules.rs` — module isolation enforcement
+  - `version_format.rs` — build.rs version string validation
+- **E2E tests** — `tests/e2e.rs` (`#[ignore]`, needs a cluster):
+  - Installs all 8 CRDs on a real cluster
+  - Creates/deletes custom resources for each CRD
+  - Full AgentJob with cross-references
+  - CI runs these against a k3d cluster
+- **Nextest config** — `.config/nextest.toml` (CI profile has
+  retries + fail-fast)
 
 ## Linting & Formatting
 

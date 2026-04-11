@@ -45,6 +45,13 @@ repos:
         types: [rust]
         pass_filenames: false
 
+      - id: architecture-rules
+        name: architecture rules
+        entry: cargo test --test architecture_rules
+        language: system
+        pass_filenames: false
+        files: \.rs$
+
       - id: cargo-deny-advisories
         name: cargo deny (advisories)
         entry: cargo deny check advisories
