@@ -5,33 +5,27 @@ this repository.
 
 ## Project
 
-<!-- Describe what this project is and what it does. -->
+thurkube is a Kubernetes controller that orchestrates Claude
+Code agents as workloads on a Kubernetes cluster. It watches
+custom resources and manages the lifecycle of Claude Code
+sessions running as pods.
 
 ## Build & Development Commands
 
 ```bash
-# Example:
-# make build
-# npm run dev
-# cargo run
+# TODO: add build commands once language/framework is chosen
 ```
 
 ## Testing
 
 ```bash
-# Example:
-# make test
-# npm test
-# cargo nextest run --all
+# TODO: add test commands once language/framework is chosen
 ```
 
 ## Linting & Formatting
 
 ```bash
-# Example:
-# make lint
-# npm run lint
-# cargo clippy --all-targets -- -D warnings
+# TODO: add lint commands once language/framework is chosen
 ```
 
 ## Conventional Commits

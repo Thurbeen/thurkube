@@ -33,16 +33,14 @@ build = { changelog_title = "Build System", order = 5 }
 ci = { omit_from_changelog = true }
 revert = { changelog_title = "Reverts", order = 6 }
 
-# Changelog template (used by `cog changelog` for release notes)
-# TODO: Update repository and owner to match your GitHub repo
+# Changelog configuration
 [changelog]
 template = "remote"
 remote = "github.com"
-repository = "my-project"
-owner = "my-org"
+repository = "thurkube"
+owner = "Thurbeen"
 
 # Map git signatures to GitHub usernames
-# TODO: Update with your git signature and GitHub username
 authors = [
-    # { signature = "Your Name", username = "your-github-username" },
+    { signature = "LeTuR", username = "magicletur" },
 ]
