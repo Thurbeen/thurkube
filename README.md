@@ -4,13 +4,44 @@ Kubernetes controller for orchestrating Claude Code agents.
 
 ## Overview
 
-thurkube manages the lifecycle of Claude Code sessions running
-as workloads on a Kubernetes cluster. It watches custom
-resources and schedules Claude Code agent pods accordingly.
+thurkube replaces the Argo Workflows-based orchestration layer
+with a dedicated Kubernetes controller. Define a single
+`ClaudeCodeJob` custom resource and the controller manages
+everything: scheduling, config injection, persistence, and
+lifecycle.
 
-## Status
+## Prerequisites
 
-Early setup — repository bootstrapped, no implementation yet.
+- [Rust](https://rustup.rs/) (stable)
+- [pre-commit](https://pre-commit.com/)
+- [cargo-nextest](https://nexte.st/)
+- [cargo-deny](https://embarkstudios.github.io/cargo-deny/)
+- [cocogitto](https://docs.cocogitto.io/)
+- [Docker](https://docs.docker.com/get-docker/) (for image
+  builds)
+
+## Getting Started
+
+```bash
+# Clone
+git clone git@github.com:Thurbeen/thurkube.git
+cd thurkube
+
+# Install git hooks
+pre-commit install
+
+# Build
+cargo build
+
+# Run tests
+cargo nextest run --all
+```
+
+## Container Image
+
+```bash
+docker pull ghcr.io/thurbeen/thurkube:latest
+```
 
 ## License
 

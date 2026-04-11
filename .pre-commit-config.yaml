@@ -14,3 +14,61 @@ repos:
     rev: v8.30.0
     hooks:
       - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --all -- --check
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy --all-targets --all-features -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-check
+        name: cargo check
+        entry: cargo check --all
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-nextest
+        name: cargo nextest
+        entry: cargo nextest run --all
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-deny-advisories
+        name: cargo deny (advisories)
+        entry: cargo deny check advisories
+        language: system
+        pass_filenames: false
+        files: \.rs$|Cargo\.(toml|lock)$
+
+      - id: cargo-deny-bans-licenses-sources
+        name: cargo deny (bans, licenses, sources)
+        entry: cargo deny check bans licenses sources
+        language: system
+        pass_filenames: false
+        files: \.rs$|Cargo\.(toml|lock)$
+
+      - id: cargo-doc
+        name: cargo doc
+        entry: env RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
+        language: system
+        pass_filenames: false
+        files: \.rs$
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.13.1-beta
+    hooks:
+      - id: hadolint-docker
+        name: hadolint
+        args: ["--ignore", "DL3008"]
