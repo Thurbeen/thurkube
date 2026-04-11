@@ -1,3 +1,5 @@
+pub mod crd;
+
 pub const VERSION: &str = env!("THURKUBE_VERSION");
 
 #[cfg(test)]

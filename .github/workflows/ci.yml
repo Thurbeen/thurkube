@@ -53,6 +53,15 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - run: cargo nextest run --all --profile ci
 
+  architecture:
+    name: Architecture Rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --test architecture_rules
+
   deny:
     name: Deny (${{ matrix.check }})
     runs-on: ubuntu-latest
@@ -89,6 +98,36 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: AbsaOSS/k3d-action@v2
+        with:
+          cluster-name: thurkube-e2e
+          args: >-
+            --no-lb
+            --k3s-arg "--disable=traefik,servicelb,metrics-server@server:*"
+      - name: Install CRDs
+        run: cargo run -- --crd | kubectl apply -f -
+      - name: Wait for CRDs
+        run: |
+          kubectl wait --for=condition=Established \
+            crd/agentjobs.thurkube.thurbeen.eu \
+            crd/agentruntimes.thurkube.thurbeen.eu \
+            crd/agentauths.thurkube.thurbeen.eu \
+            crd/agentroles.thurkube.thurbeen.eu \
+            crd/agentskills.thurkube.thurbeen.eu \
+            crd/mcpservers.thurkube.thurbeen.eu \
+            crd/repositories.thurkube.thurbeen.eu \
+            crd/clusteraccesses.thurkube.thurbeen.eu \
+            --timeout=30s
+      - name: Run E2E tests
+        run: cargo test --test e2e -- --ignored --nocapture
+
   conventional-commits:
     name: Conventional Commits
     runs-on: ubuntu-latest
@@ -109,9 +148,11 @@ jobs:
       - fmt
       - clippy
       - nextest
+      - architecture
       - deny
       - docs
       - docker-build
+      - e2e
       - conventional-commits
     runs-on: ubuntu-latest
     steps:
