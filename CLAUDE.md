@@ -95,5 +95,5 @@ Enforced by pre-commit hooks.
 
 - **Types**: feat, fix, perf, refactor, docs, style, test,
   chore, ci, build, revert
-- **Scopes**: crd, controller, reconciler, api, config, docs,
-  deps
+- **Scopes**: crd, controller, reconciler, api, config, ci,
+  docs, deps

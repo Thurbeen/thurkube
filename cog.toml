@@ -13,7 +13,7 @@ tag_prefix = "v"
 disable_bump_commit = true
 
 # List of valid commit scopes
-scopes = ["crd", "controller", "reconciler", "api", "config", "docs", "deps"]
+scopes = ["crd", "controller", "reconciler", "api", "config", "ci", "docs", "deps"]
 
 # Do not update CHANGELOG.md on bump — changelog is generated
 # at release time and included in the GitHub Release body
