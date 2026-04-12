@@ -1,0 +1,62 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "thurkube.fullname" . }}
+  labels:
+    {{- include "thurkube.labels" . | nindent 4 }}
+rules:
+  # Thurkube CRDs
+  - apiGroups: ["thurkube.thurbeen.eu"]
+    resources:
+      - agentjobs
+      - agentruntimes
+      - agentauths
+      - agentroles
+      - agentskills
+      - mcpservers
+      - repositories
+      - clusteraccesses
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["thurkube.thurbeen.eu"]
+    resources:
+      - agentjobs/status
+      - agentjobs/finalizers
+      - agentruntimes/status
+      - agentauths/status
+      - agentroles/status
+      - agentskills/status
+      - mcpservers/status
+      - repositories/status
+      - clusteraccesses/status
+      - clusteraccesses/finalizers
+    verbs: ["get", "update", "patch"]
+
+  # Pods and pod subresources for agent sessions
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "pods/exec"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # ConfigMaps / PVCs / Events
+  - apiGroups: [""]
+    resources: ["configmaps", "persistentvolumeclaims", "events"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Secrets and ServiceAccounts (ClusterAccess + AgentAuth)
+  - apiGroups: [""]
+    resources: ["secrets", "serviceaccounts"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # RBAC managed by ClusterAccess
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Jobs and CronJobs managed by AgentJob scheduling
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Leader election
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

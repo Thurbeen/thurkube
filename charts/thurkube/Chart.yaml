@@ -1,0 +1,11 @@
+apiVersion: v2
+name: thurkube
+description: Kubernetes controller for AI agent session orchestration
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/Thurbeen/thurkube
+sources:
+  - https://github.com/Thurbeen/thurkube
+maintainers:
+  - name: Thurbeen

@@ -1,0 +1,326 @@
+{{- if .Values.crds.install }}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentjobs.thurkube.thurbeen.eu
+spec:
+  group: thurkube.thurbeen.eu
+  names:
+    categories: []
+    kind: AgentJob
+    plural: agentjobs
+    shortNames:
+    - aj
+    singular: agentjob
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.schedule
+      name: Schedule
+      type: string
+    - jsonPath: .spec.suspend
+      name: Suspended
+      type: boolean
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    - jsonPath: .status.lastRunTime
+      name: Last Run
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for AgentJobSpec via `CustomResource`
+        properties:
+          spec:
+            description: The main orchestration unit. Defines a scheduled or one-shot agent job with references to runtime, auth, role, skills, MCP servers, repositories, and cluster access.
+            properties:
+              authRef:
+                description: Reference to an AgentAuth resource.
+                type: string
+              clusterAccessRef:
+                description: Reference to a ClusterAccess resource.
+                nullable: true
+                type: string
+              env:
+                description: Environment variables (native K8s EnvVar).
+                items:
+                  description: EnvVar represents an environment variable present in a Container.
+                  properties:
+                    name:
+                      description: Name of the environment variable. Must be a C_IDENTIFIER.
+                      type: string
+                    value:
+                      description: 'Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to "".'
+                      type: string
+                    valueFrom:
+                      description: Source for the environment variable's value. Cannot be used if value is not empty.
+                      properties:
+                        configMapKeyRef:
+                          description: Selects a key of a ConfigMap.
+                          properties:
+                            key:
+                              description: The key to select.
+                              type: string
+                            name:
+                              description: 'Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                              type: string
+                            optional:
+                              description: Specify whether the ConfigMap or its key must be defined
+                              type: boolean
+                          required:
+                          - key
+                          - name
+                          type: object
+                        fieldRef:
+                          description: 'Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels[''<KEY>'']`, `metadata.annotations[''<KEY>'']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.'
+                          properties:
+                            apiVersion:
+                              description: Version of the schema the FieldPath is written in terms of, defaults to "v1".
+                              type: string
+                            fieldPath:
+                              description: Path of the field to select in the specified API version.
+                              type: string
+                          required:
+                          - fieldPath
+                          type: object
+                        resourceFieldRef:
+                          description: 'Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.'
+                          properties:
+                            containerName:
+                              description: 'Container name: required for volumes, optional for env vars'
+                              type: string
+                            divisor:
+                              description: Specifies the output format of the exposed resources, defaults to "1"
+                              type: string
+                            resource:
+                              description: 'Required: resource to select'
+                              type: string
+                          required:
+                          - resource
+                          type: object
+                        secretKeyRef:
+                          description: Selects a key of a secret in the pod's namespace
+                          properties:
+                            key:
+                              description: The key of the secret to select from.  Must be a valid secret key.
+                              type: string
+                            name:
+                              description: 'Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                              type: string
+                            optional:
+                              description: Specify whether the Secret or its key must be defined
+                              type: boolean
+                          required:
+                          - key
+                          - name
+                          type: object
+                      type: object
+                  required:
+                  - name
+                  type: object
+                type: array
+              envFrom:
+                description: Bulk environment injection from Secrets/ConfigMaps.
+                items:
+                  description: EnvFromSource represents the source of a set of ConfigMaps
+                  properties:
+                    configMapRef:
+                      description: The ConfigMap to select from
+                      properties:
+                        name:
+                          description: 'Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                          type: string
+                        optional:
+                          description: Specify whether the ConfigMap must be defined
+                          type: boolean
+                      required:
+                      - name
+                      type: object
+                    prefix:
+                      description: An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.
+                      type: string
+                    secretRef:
+                      description: The Secret to select from
+                      properties:
+                        name:
+                          description: 'Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret must be defined
+                          type: boolean
+                      required:
+                      - name
+                      type: object
+                  type: object
+                type: array
+              instructions:
+                description: Additional instructions mounted as project context (e.g. CLAUDE.md for Claude Code).
+                nullable: true
+                type: string
+              mcpServerRefs:
+                description: References to McpServer resources.
+                items:
+                  type: string
+                type: array
+              model:
+                description: Model override (e.g. "sonnet", "opus").
+                nullable: true
+                type: string
+              persist:
+                default: false
+                description: Enable persistent storage. When true, the controller creates a PVC with sensible defaults.
+                type: boolean
+              prompt:
+                description: The prompt text sent to the agent.
+                type: string
+              repositoryRefs:
+                description: References to Repository resources.
+                items:
+                  type: string
+                type: array
+              resources:
+                description: Resource requests and limits for the container.
+                nullable: true
+                properties:
+                  claims:
+                    description: |-
+                      Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.
+
+                      This is an alpha field and requires enabling the DynamicResourceAllocation feature gate.
+
+                      This field is immutable. It can only be set for containers.
+                    items:
+                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                      properties:
+                        name:
+                          description: Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.
+                          type: string
+                        request:
+                          description: Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  limits:
+                    additionalProperties:
+                      description: "Quantity is a fixed-point representation of a number. It provides convenient marshaling/unmarshaling in JSON and YAML, in addition to String() and AsInt64() accessors.\n\nThe serialization format is:\n\n``` <quantity>        ::= <signedNumber><suffix>\n\n\t(Note that <suffix> may be empty, from the \"\" case in <decimalSI>.)\n\n<digit>           ::= 0 | 1 | ... | 9 <digits>          ::= <digit> | <digit><digits> <number>          ::= <digits> | <digits>.<digits> | <digits>. | .<digits> <sign>            ::= \"+\" | \"-\" <signedNumber>    ::= <number> | <sign><number> <suffix>          ::= <binarySI> | <decimalExponent> | <decimalSI> <binarySI>        ::= Ki | Mi | Gi | Ti | Pi | Ei\n\n\t(International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\n<decimalSI>       ::= m | \"\" | k | M | G | T | P | E\n\n\t(Note that 1024 = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n\n<decimalExponent> ::= \"e\" <signedNumber> | \"E\" <signedNumber> ```\n\nNo matter which of the three exponent forms is used, no quantity may represent a number greater than 2^63-1 in magnitude, nor may it have more than 3 decimal places. Numbers larger or more precise will be capped or rounded up. (E.g.: 0.1m will rounded up to 1m.) This may be extended in the future if we require larger or smaller quantities.\n\nWhen a Quantity is parsed from a string, it will remember the type of suffix it had, and will use the same type again when it is serialized.\n\nBefore serializing, Quantity will be put in \"canonical form\". This means that Exponent/suffix will be adjusted up or down (with a corresponding increase or decrease in Mantissa) such that:\n\n- No precision is lost - No fractional digits will be emitted - The exponent (or suffix) is as large as possible.\n\nThe sign will be omitted unless the number is negative.\n\nExamples:\n\n- 1.5 will be serialized as \"1500m\" - 1.5Gi will be serialized as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented by a floating point number. That is the whole point of this exercise.\n\nNon-canonical values will still parse as long as they are well formed, but will be re-emitted in their canonical form. (So always use canonical form, or don't diff.)\n\nThis format is intended to make it difficult to use these numbers without writing some sort of special handling code in the hopes that that will cause implementors to also use a fixed point implementation."
+                      type: string
+                    description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      description: "Quantity is a fixed-point representation of a number. It provides convenient marshaling/unmarshaling in JSON and YAML, in addition to String() and AsInt64() accessors.\n\nThe serialization format is:\n\n``` <quantity>        ::= <signedNumber><suffix>\n\n\t(Note that <suffix> may be empty, from the \"\" case in <decimalSI>.)\n\n<digit>           ::= 0 | 1 | ... | 9 <digits>          ::= <digit> | <digit><digits> <number>          ::= <digits> | <digits>.<digits> | <digits>. | .<digits> <sign>            ::= \"+\" | \"-\" <signedNumber>    ::= <number> | <sign><number> <suffix>          ::= <binarySI> | <decimalExponent> | <decimalSI> <binarySI>        ::= Ki | Mi | Gi | Ti | Pi | Ei\n\n\t(International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\n<decimalSI>       ::= m | \"\" | k | M | G | T | P | E\n\n\t(Note that 1024 = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n\n<decimalExponent> ::= \"e\" <signedNumber> | \"E\" <signedNumber> ```\n\nNo matter which of the three exponent forms is used, no quantity may represent a number greater than 2^63-1 in magnitude, nor may it have more than 3 decimal places. Numbers larger or more precise will be capped or rounded up. (E.g.: 0.1m will rounded up to 1m.) This may be extended in the future if we require larger or smaller quantities.\n\nWhen a Quantity is parsed from a string, it will remember the type of suffix it had, and will use the same type again when it is serialized.\n\nBefore serializing, Quantity will be put in \"canonical form\". This means that Exponent/suffix will be adjusted up or down (with a corresponding increase or decrease in Mantissa) such that:\n\n- No precision is lost - No fractional digits will be emitted - The exponent (or suffix) is as large as possible.\n\nThe sign will be omitted unless the number is negative.\n\nExamples:\n\n- 1.5 will be serialized as \"1500m\" - 1.5Gi will be serialized as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented by a floating point number. That is the whole point of this exercise.\n\nNon-canonical values will still parse as long as they are well formed, but will be re-emitted in their canonical form. (So always use canonical form, or don't diff.)\n\nThis format is intended to make it difficult to use these numbers without writing some sort of special handling code in the hopes that that will cause implementors to also use a fixed point implementation."
+                      type: string
+                    description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                type: object
+              roleRef:
+                description: Reference to an AgentRole resource.
+                type: string
+              runtimeRef:
+                description: Reference to an AgentRuntime resource.
+                type: string
+              schedule:
+                description: Cron schedule expression. Omit for a one-shot Job.
+                nullable: true
+                type: string
+              skillRef:
+                description: Reference to an AgentSkill resource.
+                nullable: true
+                type: string
+              suspend:
+                default: false
+                description: Suspend future executions without deleting the resource.
+                type: boolean
+              timeoutSeconds:
+                default: 3600
+                description: Job timeout in seconds.
+                format: uint32
+                minimum: 0.0
+                type: integer
+              timezone:
+                default: Etc/UTC
+                description: IANA timezone for the schedule.
+                type: string
+            required:
+            - authRef
+            - prompt
+            - roleRef
+            - runtimeRef
+            type: object
+          status:
+            nullable: true
+            properties:
+              conditions:
+                description: Standard Kubernetes conditions.
+                items:
+                  properties:
+                    lastTransitionTime:
+                      type: string
+                    message:
+                      nullable: true
+                      type: string
+                    reason:
+                      nullable: true
+                      type: string
+                    status:
+                      description: '"True", "False", or "Unknown".'
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              configHash:
+                description: Hash of the rendered ConfigMap data for drift detection.
+                nullable: true
+                type: string
+              lastCompletionTime:
+                description: Last time the controller observed a completion.
+                nullable: true
+                type: string
+              lastRunTime:
+                description: Last time the job was scheduled (ISO 8601).
+                nullable: true
+                type: string
+              message:
+                description: Human-readable message about current state.
+                nullable: true
+                type: string
+              observedGeneration:
+                default: 0
+                description: Generation the controller last reconciled.
+                format: int64
+                type: integer
+              ownedResources:
+                description: Child resources the controller owns.
+                items:
+                  properties:
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - kind
+                  - name
+                  type: object
+                type: array
+              phase:
+                description: 'Current phase: Pending, Running, Succeeded, Failed, Suspended.'
+                nullable: true
+                type: string
+            type: object
+        required:
+        - spec
+        title: AgentJob
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+{{- end }}

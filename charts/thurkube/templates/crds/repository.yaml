@@ -1,0 +1,57 @@
+{{- if .Values.crds.install }}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: repositories.thurkube.thurbeen.eu
+spec:
+  group: thurkube.thurbeen.eu
+  names:
+    categories: []
+    kind: Repository
+    plural: repositories
+    shortNames:
+    - repo
+    singular: repository
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns: []
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for RepositorySpec via `CustomResource`
+        properties:
+          spec:
+            description: Defines a GitHub repository with its access token.
+            properties:
+              name:
+                description: Repository name.
+                type: string
+              owner:
+                description: GitHub organization or user.
+                type: string
+              tokenSecretRef:
+                description: Reference to a Secret key containing the GitHub token.
+                nullable: true
+                properties:
+                  key:
+                    description: Key within the Secret.
+                    type: string
+                  name:
+                    description: Name of the Secret in the same namespace.
+                    type: string
+                required:
+                - key
+                - name
+                type: object
+            required:
+            - name
+            - owner
+            type: object
+        required:
+        - spec
+        title: Repository
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+{{- end }}

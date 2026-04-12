@@ -1,0 +1,56 @@
+{{- if .Values.crds.install }}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentruntimes.thurkube.thurbeen.eu
+spec:
+  group: thurkube.thurbeen.eu
+  names:
+    categories: []
+    kind: AgentRuntime
+    plural: agentruntimes
+    shortNames:
+    - ar
+    singular: agentruntime
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns: []
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for AgentRuntimeSpec via `CustomResource`
+        properties:
+          spec:
+            description: 'Defines how an agent runs: container image, entrypoint, and path conventions for config/persistence mounts.'
+            properties:
+              authEnvVar:
+                description: Name of the environment variable used to inject the auth token (e.g. "CLAUDE_CODE_OAUTH_TOKEN").
+                type: string
+              command:
+                description: Container command override.
+                items:
+                  type: string
+                type: array
+              configPath:
+                description: Path where the generated ConfigMap is mounted (read-only).
+                type: string
+              image:
+                description: Container image for the agent.
+                type: string
+              persistPath:
+                description: Path where the PVC is mounted when persistence is enabled.
+                type: string
+            required:
+            - authEnvVar
+            - configPath
+            - image
+            - persistPath
+            type: object
+        required:
+        - spec
+        title: AgentRuntime
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+{{- end }}
