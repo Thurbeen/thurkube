@@ -1,5 +1,5 @@
 ---
-name: Release
+name: CD
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: cd-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -111,6 +111,36 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  publish-chart:
+    name: Publish Helm chart
+    needs: [check-release, create-tag]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code at tag
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ needs.check-release.outputs.version }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
+        with:
+          version: v3.16.3
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} \
+            --username ${{ github.actor }} --password-stdin
+
+      - name: Package and push chart
+        run: |
+          VERSION="${{ needs.check-release.outputs.version }}"
+          VERSION="${VERSION#v}"
+          helm package charts/thurkube --version "$VERSION" --app-version "$VERSION"
+          helm push "thurkube-${VERSION}.tgz" oci://${{ env.REGISTRY }}/thurbeen/charts
+
   generate-changelog:
     name: Generate changelog
     needs: [check-release, create-tag]
@@ -133,7 +163,7 @@ jobs:
 
   publish:
     name: Publish GitHub Release
-    needs: [check-release, create-tag, build-and-push, generate-changelog]
+    needs: [check-release, create-tag, build-and-push, publish-chart, generate-changelog]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -148,6 +178,12 @@ jobs:
 
             ```
             docker pull ghcr.io/${{ github.repository }}:${{ needs.check-release.outputs.version }}
+            ```
+
+            ## Helm Chart
+
+            ```
+            helm pull oci://ghcr.io/thurbeen/charts/thurkube --version ${{ needs.check-release.outputs.version }}
             ```
 
             ## Changelog

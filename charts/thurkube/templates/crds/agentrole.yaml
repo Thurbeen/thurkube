@@ -1,0 +1,41 @@
+{{- if .Values.crds.install }}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentroles.thurkube.thurbeen.eu
+spec:
+  group: thurkube.thurbeen.eu
+  names:
+    categories: []
+    kind: AgentRole
+    plural: agentroles
+    shortNames:
+    - arl
+    singular: agentrole
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns: []
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for AgentRoleSpec via `CustomResource`
+        properties:
+          spec:
+            description: Defines which tools an agent is allowed to use.
+            properties:
+              allowedTools:
+                description: List of allowed tool names (e.g. "Bash", "Read", "mcp__gmail__*").
+                items:
+                  type: string
+                type: array
+            required:
+            - allowedTools
+            type: object
+        required:
+        - spec
+        title: AgentRole
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+{{- end }}

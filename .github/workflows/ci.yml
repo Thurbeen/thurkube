@@ -128,6 +128,27 @@ jobs:
       - name: Run E2E tests
         run: cargo test --test e2e -- --ignored --nocapture
 
+  helm-lint:
+    name: Helm Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
+        with:
+          version: v3.16.3
+      - name: Install kubeconform
+        run: |
+          curl -sSL -o /tmp/kubeconform.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf /tmp/kubeconform.tar.gz -C /tmp
+          sudo mv /tmp/kubeconform /usr/local/bin/
+      - name: Helm lint
+        run: helm lint charts/thurkube
+      - name: Validate rendered manifests
+        run: |
+          helm template thurkube charts/thurkube --namespace thurkube-system \
+            | kubeconform -strict -summary -ignore-missing-schemas
+
   conventional-commits:
     name: Conventional Commits
     runs-on: ubuntu-latest
@@ -153,6 +174,7 @@ jobs:
       - docs
       - docker-build
       - e2e
+      - helm-lint
       - conventional-commits
     runs-on: ubuntu-latest
     steps:
