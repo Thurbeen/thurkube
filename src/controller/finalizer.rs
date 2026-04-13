@@ -6,7 +6,7 @@ use kube::Api;
 use kube::{Client, ResourceExt};
 
 use crate::controller::build::owner_label_selector;
-use crate::controller::{Error, FIELD_MANAGER, FINALIZER};
+use crate::controller::{Error, FINALIZER};
 use crate::crd::AgentJob;
 
 pub fn has_finalizer(ajob: &AgentJob) -> bool {
@@ -26,12 +26,8 @@ pub async fn add_finalizer(api: &Api<AgentJob>, ajob: &AgentJob) -> Result<(), E
     let patch = serde_json::json!({
         "metadata": { "finalizers": finalizers }
     });
-    api.patch(
-        &name,
-        &PatchParams::apply(FIELD_MANAGER).force(),
-        &Patch::Merge(&patch),
-    )
-    .await?;
+    api.patch(&name, &PatchParams::default(), &Patch::Merge(&patch))
+        .await?;
     Ok(())
 }
 
@@ -51,12 +47,8 @@ pub async fn remove_finalizer(api: &Api<AgentJob>, ajob: &AgentJob) -> Result<()
     let patch = serde_json::json!({
         "metadata": { "finalizers": finalizers }
     });
-    api.patch(
-        &name,
-        &PatchParams::apply(FIELD_MANAGER).force(),
-        &Patch::Merge(&patch),
-    )
-    .await?;
+    api.patch(&name, &PatchParams::default(), &Patch::Merge(&patch))
+        .await?;
     Ok(())
 }
 
