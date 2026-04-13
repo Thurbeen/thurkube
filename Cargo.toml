@@ -23,7 +23,7 @@ serde_json = "1"
 serde_yaml = "0.9"
 
 # CLI
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", features = ["derive", "env"] }
 
 # Observability
 tracing = "0.1"
@@ -35,6 +35,20 @@ thiserror = "2"
 
 # Schema generation (for CRD)
 schemars = "0.8"
+
+# Hashing (configHash for drift detection)
+sha2 = "0.10"
+
+# Timestamps (RFC3339 for status conditions)
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+
+# Health / readiness HTTP server
+hyper = { version = "1", features = ["http1", "server"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+
+# Cancellation token for graceful shutdown
+tokio-util = { version = "0.7", features = ["rt"] }
 
 [profile.dev]
 opt-level = 0

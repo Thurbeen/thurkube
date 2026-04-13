@@ -20,6 +20,16 @@ resources:
 crds:
   install: true
 
+probes:
+  enabled: true
+  port: 8080
+  liveness:
+    initialDelaySeconds: 10
+    periodSeconds: 20
+  readiness:
+    initialDelaySeconds: 3
+    periodSeconds: 5
+
 serviceAccount:
   create: true
   name: ""
