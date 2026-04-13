@@ -88,6 +88,8 @@ pub async fn reconcile(ajob: Arc<AgentJob>, ctx: Arc<Ctx>) -> Result<Action, Err
 
     let agent_json = build::agent_config_json(&ajob, &resolved)?;
     let hash = build::config_hash(&agent_json);
+    let hash_changed =
+        ajob.status.as_ref().and_then(|s| s.config_hash.as_deref()) != Some(hash.as_str());
 
     let cm = build::configmap(&ajob, &ns, &agent_json);
     let mut owned: Vec<OwnedResource> = Vec::with_capacity(6);
@@ -188,7 +190,7 @@ pub async fn reconcile(ajob: Arc<AgentJob>, ctx: Arc<Ctx>) -> Result<Action, Err
             config_hash: Some(hash),
             owned,
             ready: Some((true, "Reconciled", format!("{kind}/{name}"))),
-            last_run_time: Some(Utc::now().to_rfc3339()),
+            last_run_time: hash_changed.then(|| Utc::now().to_rfc3339()),
         },
     )
     .await?;
