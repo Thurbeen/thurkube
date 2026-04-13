@@ -46,10 +46,15 @@ rules:
     resources: ["secrets", "serviceaccounts"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
-  # RBAC managed by ClusterAccess
+  # RBAC managed by ClusterAccess.
+  # `escalate` + `bind` let the controller create ClusterRoles /
+  # ClusterRoleBindings whose rules the controller itself does
+  # not hold — necessary because user-authored ClusterAccess
+  # resources routinely grant broader read access than thurkube
+  # needs to operate.
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "escalate", "bind"]
 
   # Jobs and CronJobs managed by AgentJob scheduling
   - apiGroups: ["batch"]
