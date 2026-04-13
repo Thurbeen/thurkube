@@ -1,4 +1,6 @@
+pub mod controller;
 pub mod crd;
+pub mod health;
 
 pub const VERSION: &str = env!("THURKUBE_VERSION");
 
