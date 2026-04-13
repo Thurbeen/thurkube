@@ -75,6 +75,10 @@ pub async fn patch_status(
         conditions,
     };
 
+    if status_equivalent(ajob.status.as_ref(), &status) {
+        return Ok(());
+    }
+
     let patch = serde_json::json!({
         "apiVersion": "thurkube.thurbeen.eu/v1alpha1",
         "kind": "AgentJob",
@@ -88,6 +92,44 @@ pub async fn patch_status(
     )
     .await?;
     Ok(())
+}
+
+/// Compare an existing status to a newly-built one, ignoring
+/// `lastTransitionTime` on conditions whose `status` has not
+/// changed. Prevents feedback loops where every reconcile writes
+/// status → triggers a watch event → reconciles again.
+fn status_equivalent(old: Option<&AgentJobStatus>, new: &AgentJobStatus) -> bool {
+    let Some(old) = old else {
+        return false;
+    };
+    if old.phase != new.phase
+        || old.message != new.message
+        || old.observed_generation != new.observed_generation
+        || old.config_hash != new.config_hash
+        || old.last_run_time != new.last_run_time
+        || old.last_completion_time != new.last_completion_time
+        || old.owned_resources.len() != new.owned_resources.len()
+    {
+        return false;
+    }
+    for (a, b) in old.owned_resources.iter().zip(new.owned_resources.iter()) {
+        if a.kind != b.kind || a.name != b.name {
+            return false;
+        }
+    }
+    if old.conditions.len() != new.conditions.len() {
+        return false;
+    }
+    for (a, b) in old.conditions.iter().zip(new.conditions.iter()) {
+        if a.r#type != b.r#type
+            || a.status != b.status
+            || a.reason != b.reason
+            || a.message != b.message
+        {
+            return false;
+        }
+    }
+    true
 }
 
 fn set_condition(conds: &mut Vec<Condition>, new: Condition) {
