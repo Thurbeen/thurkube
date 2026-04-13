@@ -4,10 +4,10 @@ use std::collections::BTreeMap;
 
 use k8s_openapi::api::batch::v1::{CronJob, CronJobSpec, Job, JobSpec, JobTemplateSpec};
 use k8s_openapi::api::core::v1::{
-    ConfigMap, ConfigMapVolumeSource, Container, EnvVar, EnvVarSource, PersistentVolumeClaim,
-    PersistentVolumeClaimSpec, PersistentVolumeClaimVolumeSource, PodSpec, PodTemplateSpec,
-    ResourceRequirements, SecretKeySelector, SecurityContext, ServiceAccount, Volume, VolumeMount,
-    VolumeResourceRequirements,
+    ConfigMap, ConfigMapVolumeSource, Container, EmptyDirVolumeSource, EnvVar, EnvVarSource,
+    PersistentVolumeClaim, PersistentVolumeClaimSpec, PersistentVolumeClaimVolumeSource, PodSpec,
+    PodTemplateSpec, ResourceRequirements, SecretKeySelector, SecurityContext, ServiceAccount,
+    Volume, VolumeMount, VolumeResourceRequirements,
 };
 use k8s_openapi::api::rbac::v1::{ClusterRole, ClusterRoleBinding, RoleRef, Subject};
 use k8s_openapi::apimachinery::pkg::api::resource::Quantity;
@@ -21,6 +21,7 @@ use crate::controller::{LABEL_AGENTJOB, LABEL_AGENTJOB_NS, LABEL_MANAGED_BY, LAB
 use crate::crd::AgentJob;
 
 const POD_USER: i64 = 65532;
+const AGENT_HOME: &str = "/home/agent";
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -265,6 +266,31 @@ fn pod_template(ajob: &AgentJob, r: &Resolved, namespace: &str) -> PodTemplateSp
             ..Default::default()
         });
     }
+
+    // Writable scratch dirs needed because the container runs
+    // with readOnlyRootFilesystem=true. Backing them with
+    // emptyDir keeps every AgentJob image working out-of-the-box
+    // without per-image config.
+    for (name, path) in [("tmp", "/tmp"), ("home", AGENT_HOME)] {
+        volume_mounts.push(VolumeMount {
+            name: name.into(),
+            mount_path: path.into(),
+            ..Default::default()
+        });
+        volumes.push(Volume {
+            name: name.into(),
+            empty_dir: Some(EmptyDirVolumeSource::default()),
+            ..Default::default()
+        });
+    }
+
+    // Force HOME to the writable emptyDir so tools that respect
+    // $HOME (claude, gh, npm, git, ssh) write to the right place.
+    env.push(EnvVar {
+        name: "HOME".into(),
+        value: Some(AGENT_HOME.into()),
+        ..Default::default()
+    });
 
     let command = if r.runtime.spec.command.is_empty() {
         None
