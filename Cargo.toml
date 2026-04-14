@@ -34,7 +34,7 @@ anyhow = "1"
 thiserror = "2"
 
 # Schema generation (for CRD)
-schemars = "0.8"
+schemars = "0.9"
 
 # Hashing (configHash for drift detection)
 sha2 = "0.11"
