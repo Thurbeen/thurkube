@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>thurkube — Kubernetes controller for Claude Code agents</title>
+    <meta
+      name="description"
+      content="thurkube is a Rust-based Kubernetes operator that runs Claude Code agents as native Jobs and CronJobs. Eight CRDs, one binary, kube-rs under the hood."
+    />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/landing.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+      <!-- prettier-ignore -->
+      <a href="index.html" class="nav-brand">thur<span>kube</span></a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#installation">Install</a></li>
+        <li><a href="docs/index.html">Docs</a></li>
+        <li>
+          <a
+            href="https://github.com/Thurbeen/thurkube"
+            class="github-link"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg class="icon-github" viewBox="0 0 16 16">
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+            GitHub
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero section">
+      <div class="container">
+        <h1>
+          Claude Code agents,
+          <span class="accent">native to Kubernetes</span>
+        </h1>
+        <p class="subtitle">
+          A Rust controller built on
+          <code>kube-rs</code>
+          that turns AI agent runs into first-class Kubernetes resources. One CRD per agent — the
+          operator handles scheduling, RBAC, secrets, persistence, and lifecycle.
+        </p>
+        <div class="hero-ctas">
+          <a href="#installation" class="btn btn-primary">Install with Helm</a>
+          <a href="docs/index.html" class="btn btn-secondary">View Docs</a>
+        </div>
+        <div class="hero-badges">
+          <span class="badge badge-yellow">Apache-2.0</span>
+          <span class="badge badge-green">Built with Rust</span>
+        </div>
+        <div class="hero-demo">
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">agentjob.yaml</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">AgentJob</span>
+<span class="syn-key">metadata</span>:
+  <span class="syn-key">name</span>: <span class="syn-value">pr-fixer</span>
+  <span class="syn-key">namespace</span>: <span class="syn-value">agents</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">schedule</span>: <span class="syn-string">"0 */6 * * *"</span>
+  <span class="syn-key">timezone</span>: <span class="syn-value">Europe/Paris</span>
+  <span class="syn-key">runtimeRef</span>: <span class="syn-value">claude-code</span>
+  <span class="syn-key">authRef</span>:    <span class="syn-value">claude-oauth</span>
+  <span class="syn-key">roleRef</span>:    <span class="syn-value">default</span>
+  <span class="syn-key">repositoryRefs</span>: <span class="syn-bracket">[</span><span class="syn-value">thurkube</span><span class="syn-bracket">]</span>
+  <span class="syn-key">prompt</span>: <span class="syn-string">"Fix any failing PRs on this repository."</span>
+  <span class="syn-key">persist</span>: <span class="syn-keyword">true</span></code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features section" id="features">
+      <div class="container">
+        <div class="section-title">
+          <h2>Features</h2>
+          <p>Eight CRDs, one binary, the full Kubernetes contract</p>
+        </div>
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="card-icon">&#x2699;</div>
+            <h3>AgentJob orchestration</h3>
+            <p>
+              One
+              <code>AgentJob</code>
+              resource defines a one-shot or scheduled agent run. The controller emits the matching
+              <code>Job</code>
+              or
+              <code>CronJob</code>
+              and owns its lifecycle end-to-end.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f9e9;</div>
+            <h3>Composable references</h3>
+            <p>
+              Runtimes, auth, roles, skills, MCP servers, repositories, and RBAC are separate CRDs.
+              Reference them by name and reuse them across many jobs.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f510;</div>
+            <h3>Secrets &amp; RBAC</h3>
+            <p>
+              Auth tokens flow from
+              <code>Secret</code>
+              keys into the right env var.
+              <code>ClusterAccess</code>
+              materializes a ServiceAccount, ClusterRole, and ClusterRoleBinding scoped to the job.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f4be;</div>
+            <h3>Optional persistence</h3>
+            <p>
+              Set
+              <code>persist: true</code>
+              and the controller provisions a PVC with sensible defaults — mounted at the runtime's
+              declared
+              <code>persistPath</code>
+              .
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f501;</div>
+            <h3>Drift detection</h3>
+            <p>
+              A
+              <code>configHash</code>
+              in
+              <code>.status</code>
+              tracks the rendered ConfigMap. Spec or reference changes redeploy the underlying Job
+              without manual cleanup.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f50c;</div>
+            <h3>MCP servers &amp; skills</h3>
+            <p>
+              Bind
+              <code>McpServer</code>
+              resources (local
+              <code>command</code>
+              or remote
+              <code>url</code>
+              ) and reusable
+              <code>AgentSkill</code>
+              repositories. The controller assembles them into the agent's runtime config.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f6e1;</div>
+            <h3>Locked-down pods</h3>
+            <p>
+              The controller runs as
+              <code>runAsNonRoot</code>
+              with
+              <code>readOnlyRootFilesystem</code>
+              , dropped capabilities, and the
+              <code>RuntimeDefault</code>
+              seccomp profile.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f3d7;</div>
+            <h3>kube-rs powered</h3>
+            <p>
+              Single Rust binary with a tokio runtime, server-side apply via field manager
+              <code>thurkube</code>
+              , and standard
+              <code>/healthz</code>
+              and
+              <code>/readyz</code>
+              probes.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">&#x1f4e6;</div>
+            <h3>Helm-installable</h3>
+            <p>
+              Ship the chart from
+              <code>charts/thurkube</code>
+              or pull the OCI artifact from GHCR. CRDs install on chart apply (toggle with
+              <code>crds.install</code>
+              ).
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section" id="how-it-works">
+      <div class="container">
+        <div class="section-title">
+          <h2>How It Works</h2>
+          <p>Four steps from cluster to running agent</p>
+        </div>
+        <div class="how-it-works-steps">
+          <div class="step">
+            <span class="step-number">1</span>
+            <div class="step-content">
+              <h3>Install</h3>
+              <p>Deploy the controller and CRDs via Helm.</p>
+              <div class="terminal-frame">
+                <div class="terminal-header">
+                  <div class="terminal-dot red"></div>
+                  <div class="terminal-dot yellow"></div>
+                  <div class="terminal-dot green"></div>
+                  <span class="terminal-title">bash</span>
+                </div>
+                <div class="terminal-body">
+                  <button
+                    class="copy-btn"
+                    data-code="helm install thurkube oci://ghcr.io/thurbeen/charts/thurkube --namespace thurkube-system --create-namespace"
+                  >
+                    Copy
+                  </button>
+                  <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">helm</span> install thurkube <span class="syn-url">oci://ghcr.io/thurbeen/charts/thurkube</span> \
+    <span class="syn-flag">--namespace</span> thurkube-system <span class="syn-flag">--create-namespace</span></code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <span class="step-number">2</span>
+            <div class="step-content">
+              <h3>Define a runtime + auth</h3>
+              <p>
+                An
+                <code>AgentRuntime</code>
+                points at your container image. An
+                <code>AgentAuth</code>
+                wires a Secret key into it.
+              </p>
+              <div class="terminal-frame">
+                <div class="terminal-header">
+                  <div class="terminal-dot red"></div>
+                  <div class="terminal-dot yellow"></div>
+                  <div class="terminal-dot green"></div>
+                  <span class="terminal-title">runtime.yaml</span>
+                </div>
+                <div class="terminal-body">
+                  <pre><code><span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">AgentRuntime</span>
+<span class="syn-key">metadata</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">claude-code</span> <span class="syn-bracket">}</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">image</span>: <span class="syn-value">ghcr.io/thurbeen/claude-code-job:latest</span>
+  <span class="syn-key">authEnvVar</span>: <span class="syn-value">CLAUDE_CODE_OAUTH_TOKEN</span>
+  <span class="syn-key">configPath</span>: <span class="syn-value">/etc/claude-code-job</span>
+  <span class="syn-key">persistPath</span>: <span class="syn-value">/var/lib/claude-code-job</span></code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <span class="step-number">3</span>
+            <div class="step-content">
+              <h3>Create an AgentJob</h3>
+              <p>Reference your runtime, auth, role, and any optional repositories or MCP servers.</p>
+              <div class="terminal-frame">
+                <div class="terminal-header">
+                  <div class="terminal-dot red"></div>
+                  <div class="terminal-dot yellow"></div>
+                  <div class="terminal-dot green"></div>
+                  <span class="terminal-title">job.yaml</span>
+                </div>
+                <div class="terminal-body">
+                  <pre><code><span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">AgentJob</span>
+<span class="syn-key">metadata</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">summarize</span> <span class="syn-bracket">}</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">runtimeRef</span>: <span class="syn-value">claude-code</span>
+  <span class="syn-key">authRef</span>:    <span class="syn-value">claude-oauth</span>
+  <span class="syn-key">roleRef</span>:    <span class="syn-value">read-only</span>
+  <span class="syn-key">prompt</span>: <span class="syn-string">"Summarize today's incoming issues."</span></code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <span class="step-number">4</span>
+            <div class="step-content">
+              <h3>Watch it reconcile</h3>
+              <p>
+                The controller emits a
+                <code>Job</code>
+                or
+                <code>CronJob</code>
+                , wires up the ConfigMap, ServiceAccount, and PVC, and reports phase via printer
+                columns.
+              </p>
+              <div class="terminal-frame">
+                <div class="terminal-header">
+                  <div class="terminal-dot red"></div>
+                  <div class="terminal-dot yellow"></div>
+                  <div class="terminal-dot green"></div>
+                  <span class="terminal-title">bash</span>
+                </div>
+                <div class="terminal-body">
+                  <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> get aj <span class="syn-flag">-n</span> agents
+NAME        SCHEDULE      SUSPENDED  PHASE      LAST RUN
+summarize   &lt;none&gt;        false      Succeeded  2m
+pr-fixer    0 */6 * * *   false      Running    14s</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation -->
+    <section class="install section" id="installation">
+      <div class="container">
+        <div class="section-title">
+          <h2>Installation</h2>
+          <p>Helm is the supported path</p>
+        </div>
+        <div class="install-main">
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">bash</span>
+            </div>
+            <div class="terminal-body">
+              <button
+                class="copy-btn"
+                data-code="helm install thurkube oci://ghcr.io/thurbeen/charts/thurkube --namespace thurkube-system --create-namespace"
+              >
+                Copy
+              </button>
+              <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">helm</span> install thurkube <span class="syn-url">oci://ghcr.io/thurbeen/charts/thurkube</span> \
+    <span class="syn-flag">--namespace</span> thurkube-system <span class="syn-flag">--create-namespace</span></code></pre>
+            </div>
+          </div>
+          <p style="margin-top: var(--space-md)">
+            Installs the eight CRDs and the controller Deployment with locked-down pod security.
+            Override anything via
+            <code>--set</code>
+            or
+            <code>--values</code>
+            .
+          </p>
+
+          <div class="install-alt">
+            <div class="install-alt-item">
+              <h4>CRDs only</h4>
+              <p><code>docker run --rm ghcr.io/thurbeen/thurkube:latest --crd | kubectl apply -f -</code></p>
+            </div>
+            <div class="install-alt-item">
+              <h4>Pin a version</h4>
+              <p><code>--set image.tag=v0.1.0</code></p>
+            </div>
+            <div class="install-alt-item">
+              <h4>From source</h4>
+              <p><code>cargo build --release</code></p>
+            </div>
+          </div>
+
+          <div class="prereqs">
+            <h3>Prerequisites</h3>
+            <ul>
+              <li>
+                <strong>Kubernetes 1.28+</strong>
+                &mdash; cluster to run the controller
+              </li>
+              <li>
+                <strong>Helm 3.16+</strong>
+                &mdash; chart installation
+              </li>
+              <li>
+                <strong>kubectl</strong>
+                &mdash; for direct CRD installs
+              </li>
+              <li>
+                <strong>Rust 1.75+</strong>
+                &mdash; only for building from source
+                <span class="optional">(optional)</span>
+              </li>
+              <li>
+                <strong>k3d</strong>
+                or kind &mdash; running the E2E suite locally
+                <span class="optional">(optional)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>
+          thurkube is open source under the
+          <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">
+            Apache License 2.0
+          </a>
+        </p>
+        <p>
+          <a href="https://github.com/Thurbeen/thurkube" target="_blank" rel="noopener">GitHub</a>
+          &middot; Built with Rust &amp;
+          <a href="https://github.com/kube-rs/kube" target="_blank" rel="noopener">kube-rs</a>
+        </p>
+      </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>

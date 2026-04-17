@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CRD Reference — thurkube Docs</title>
+    <meta
+      name="description"
+      content="Field-by-field reference for all eight thurkube custom resources in the thurkube.thurbeen.eu/v1alpha1 API group."
+    />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/docs.css" />
+  </head>
+  <body>
+    <nav class="nav scrolled" id="nav">
+      <!-- prettier-ignore -->
+      <a href="../index.html" class="nav-brand">thur<span>kube</span></a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="../index.html#features">Features</a></li>
+        <li><a href="../index.html#installation">Install</a></li>
+        <li><a href="index.html" style="color: var(--text-primary)">Docs</a></li>
+        <li>
+          <a
+            href="https://github.com/Thurbeen/thurkube"
+            class="github-link"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg class="icon-github" viewBox="0 0 16 16">
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+            GitHub
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="docs-page">
+      <div class="docs-layout">
+        <aside class="docs-sidebar" id="docs-sidebar">
+          <h4>Getting Started</h4>
+          <ul>
+            <li><a href="quickstart.html">Quickstart</a></li>
+          </ul>
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="architecture.html">Architecture</a></li>
+            <li><a href="crd-reference.html" class="current-page">CRD Reference</a></li>
+          </ul>
+          <h4>On This Page</h4>
+          <ul>
+            <li><a href="#agentjob">AgentJob</a></li>
+            <li><a href="#agentruntime">AgentRuntime</a></li>
+            <li><a href="#agentauth">AgentAuth</a></li>
+            <li><a href="#agentrole">AgentRole</a></li>
+            <li><a href="#agentskill">AgentSkill</a></li>
+            <li><a href="#mcpserver">McpServer</a></li>
+            <li><a href="#repository">Repository</a></li>
+            <li><a href="#clusteraccess">ClusterAccess</a></li>
+          </ul>
+        </aside>
+
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          &#9776;
+        </button>
+
+        <main class="docs-content">
+          <div class="breadcrumbs">
+            <a href="../index.html">Home</a>
+            <span class="separator">/</span>
+            <a href="index.html">Docs</a>
+            <span class="separator">/</span>
+            <span class="current">CRD Reference</span>
+          </div>
+
+          <h1>CRD Reference</h1>
+          <p>
+            All resources are namespaced and live in
+            <code>thurkube.thurbeen.eu/v1alpha1</code>
+            . Print the canonical YAML at any time with:
+          </p>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">bash</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">cargo</span> run <span class="syn-flag">--</span> <span class="syn-flag">--crd</span>
+<span class="syn-comment"># or, from the published image:</span>
+<span class="syn-prompt">$</span> <span class="syn-cmd">docker</span> run <span class="syn-flag">--rm</span> <span class="syn-url">ghcr.io/thurbeen/thurkube:latest</span> <span class="syn-flag">--crd</span></code></pre>
+            </div>
+          </div>
+
+          <h2 id="agentjob">
+            AgentJob
+            <a href="#agentjob" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>aj</code>
+            . The orchestration unit. References every other resource and defines the prompt and
+            schedule.
+          </p>
+          <h3>Spec</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>schedule</code></td>
+                <td>string</td>
+                <td>&mdash;</td>
+                <td>Cron expression. Omit for a one-shot Job.</td>
+              </tr>
+              <tr>
+                <td><code>timezone</code></td>
+                <td>string</td>
+                <td><code>Etc/UTC</code></td>
+                <td>IANA timezone for the schedule.</td>
+              </tr>
+              <tr>
+                <td><code>suspend</code></td>
+                <td>bool</td>
+                <td><code>false</code></td>
+                <td>Suspend future executions without deleting the resource.</td>
+              </tr>
+              <tr>
+                <td><code>runtimeRef</code></td>
+                <td>string</td>
+                <td><strong>required</strong></td>
+                <td>Name of an AgentRuntime in the same namespace.</td>
+              </tr>
+              <tr>
+                <td><code>authRef</code></td>
+                <td>string</td>
+                <td><strong>required</strong></td>
+                <td>Name of an AgentAuth in the same namespace.</td>
+              </tr>
+              <tr>
+                <td><code>roleRef</code></td>
+                <td>string</td>
+                <td><strong>required</strong></td>
+                <td>Name of an AgentRole in the same namespace.</td>
+              </tr>
+              <tr>
+                <td><code>skillRef</code></td>
+                <td>string</td>
+                <td>&mdash;</td>
+                <td>Optional AgentSkill name.</td>
+              </tr>
+              <tr>
+                <td><code>clusterAccessRef</code></td>
+                <td>string</td>
+                <td>&mdash;</td>
+                <td>Optional ClusterAccess name.</td>
+              </tr>
+              <tr>
+                <td><code>mcpServerRefs</code></td>
+                <td>[]string</td>
+                <td><code>[]</code></td>
+                <td>List of McpServer names.</td>
+              </tr>
+              <tr>
+                <td><code>repositoryRefs</code></td>
+                <td>[]string</td>
+                <td><code>[]</code></td>
+                <td>List of Repository names.</td>
+              </tr>
+              <tr>
+                <td><code>prompt</code></td>
+                <td>string</td>
+                <td><strong>required</strong></td>
+                <td>The prompt text sent to the agent.</td>
+              </tr>
+              <tr>
+                <td><code>instructions</code></td>
+                <td>string</td>
+                <td>&mdash;</td>
+                <td>
+                  Project-context file contents (e.g. CLAUDE.md). Mounted alongside the rendered
+                  config.
+                </td>
+              </tr>
+              <tr>
+                <td><code>model</code></td>
+                <td>string</td>
+                <td>&mdash;</td>
+                <td>
+                  Model override (e.g.
+                  <code>sonnet</code>
+                  ,
+                  <code>opus</code>
+                  ).
+                </td>
+              </tr>
+              <tr>
+                <td><code>resources</code></td>
+                <td>k8s
+                  <code>ResourceRequirements</code>
+                </td>
+                <td>&mdash;</td>
+                <td>Container requests/limits.</td>
+              </tr>
+              <tr>
+                <td><code>timeoutSeconds</code></td>
+                <td>uint32</td>
+                <td><code>3600</code></td>
+                <td>Job timeout in seconds.</td>
+              </tr>
+              <tr>
+                <td><code>env</code></td>
+                <td>[]
+                  <code>EnvVar</code>
+                </td>
+                <td><code>[]</code></td>
+                <td>Native Kubernetes env vars.</td>
+              </tr>
+              <tr>
+                <td><code>envFrom</code></td>
+                <td>[]
+                  <code>EnvFromSource</code>
+                </td>
+                <td><code>[]</code></td>
+                <td>Bulk env injection from Secrets/ConfigMaps.</td>
+              </tr>
+              <tr>
+                <td><code>persist</code></td>
+                <td>bool</td>
+                <td><code>false</code></td>
+                <td>Provision a PVC mounted at the runtime's persistPath.</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Status</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>phase</code></td>
+                <td>string</td>
+                <td>One of Pending, Running, Succeeded, Failed, Suspended.</td>
+              </tr>
+              <tr>
+                <td><code>lastRunTime</code></td>
+                <td>RFC3339 string</td>
+                <td>Last time the controller scheduled a run.</td>
+              </tr>
+              <tr>
+                <td><code>lastCompletionTime</code></td>
+                <td>RFC3339 string</td>
+                <td>Last time the controller observed a completion.</td>
+              </tr>
+              <tr>
+                <td><code>message</code></td>
+                <td>string</td>
+                <td>Human-readable status message.</td>
+              </tr>
+              <tr>
+                <td><code>observedGeneration</code></td>
+                <td>int64</td>
+                <td>Generation last reconciled.</td>
+              </tr>
+              <tr>
+                <td><code>configHash</code></td>
+                <td>string</td>
+                <td>Hash of the rendered ConfigMap, used for drift detection.</td>
+              </tr>
+              <tr>
+                <td><code>ownedResources</code></td>
+                <td>[]
+                  <code>{kind, name}</code>
+                </td>
+                <td>Children the controller manages.</td>
+              </tr>
+              <tr>
+                <td><code>conditions</code></td>
+                <td>[]Condition</td>
+                <td>Standard Kubernetes-style conditions.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="agentruntime">
+            AgentRuntime
+            <a href="#agentruntime" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>ar</code>
+            . Defines the container image and the path conventions for mounted config and
+            persistence.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>image</code></td>
+                <td>string</td>
+                <td>Container image (e.g. ghcr.io/thurbeen/claude-code-job:latest).</td>
+              </tr>
+              <tr>
+                <td><code>command</code></td>
+                <td>[]string</td>
+                <td>Optional entrypoint override.</td>
+              </tr>
+              <tr>
+                <td><code>authEnvVar</code></td>
+                <td>string</td>
+                <td>Name of the env var that receives the auth token.</td>
+              </tr>
+              <tr>
+                <td><code>configPath</code></td>
+                <td>string</td>
+                <td>Read-only mount path for the rendered ConfigMap.</td>
+              </tr>
+              <tr>
+                <td><code>persistPath</code></td>
+                <td>string</td>
+                <td>Mount path for the PVC when persistence is enabled.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="agentauth">
+            AgentAuth
+            <a href="#agentauth" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>aa</code>
+            . References a Kubernetes
+            <code>Secret</code>
+            key holding the agent's auth token. The controller wires the value into the env var
+            named by the runtime's
+            <code>authEnvVar</code>
+            .
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>secretRef.name</code></td>
+                <td>string</td>
+                <td>Secret name in the same namespace.</td>
+              </tr>
+              <tr>
+                <td><code>secretRef.key</code></td>
+                <td>string</td>
+                <td>Key within that Secret.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="agentrole">
+            AgentRole
+            <a href="#agentrole" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>arl</code>
+            . Defines which tools the agent is allowed to use.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>allowedTools</code></td>
+                <td>[]string</td>
+                <td>
+                  Tool names. Supports glob wildcards (e.g.
+                  <code>mcp__gmail__*</code>
+                  ).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="agentskill">
+            AgentSkill
+            <a href="#agentskill" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>ask</code>
+            . Reusable skill from a GitHub repository.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>repo</code></td>
+                <td>string</td>
+                <td><strong>required</strong></td>
+                <td>
+                  GitHub repository in
+                  <code>owner/repo</code>
+                  format.
+                </td>
+              </tr>
+              <tr>
+                <td><code>name</code></td>
+                <td>string</td>
+                <td><strong>required</strong></td>
+                <td>Skill directory name within the repository.</td>
+              </tr>
+              <tr>
+                <td><code>ref</code></td>
+                <td>string</td>
+                <td><code>main</code></td>
+                <td>Git ref (branch, tag, SHA) to check out.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="mcpserver">
+            McpServer
+            <a href="#mcpserver" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>mcp</code>
+            . An MCP server: either a local command or a remote URL. The two are mutually exclusive.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>command</code></td>
+                <td>string</td>
+                <td>
+                  Command to start a local MCP server (e.g.
+                  <code>npx</code>
+                  ).
+                </td>
+              </tr>
+              <tr>
+                <td><code>args</code></td>
+                <td>[]string</td>
+                <td>Arguments for the command.</td>
+              </tr>
+              <tr>
+                <td><code>url</code></td>
+                <td>string</td>
+                <td>URL of a remote MCP server.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="repository">
+            Repository
+            <a href="#repository" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>repo</code>
+            . A GitHub repository the agent should clone, optionally with a token.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>owner</code></td>
+                <td>string</td>
+                <td>GitHub organization or user.</td>
+              </tr>
+              <tr>
+                <td><code>name</code></td>
+                <td>string</td>
+                <td>Repository name.</td>
+              </tr>
+              <tr>
+                <td><code>tokenSecretRef</code></td>
+                <td>
+                  <code>{name, key}</code>
+                </td>
+                <td>Optional Secret-key reference for the GitHub token.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="clusteraccess">
+            ClusterAccess
+            <a href="#clusteraccess" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Short name:
+            <code>ca</code>
+            . Kubernetes RBAC rules to grant the agent. When referenced by an
+            <code>AgentJob</code>
+            , the controller materializes a per-job ServiceAccount, ClusterRole, and
+            ClusterRoleBinding.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>rules</code></td>
+                <td>[]
+                  <code>PolicyRule</code>
+                </td>
+                <td>
+                  Same syntax as a ClusterRole's
+                  <code>rules</code>
+                  field.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="info-box warning">
+            <p>
+              ClusterRoles are cluster-scoped. Treat
+              <code>ClusterAccess</code>
+              specs as security-sensitive and review them before applying.
+            </p>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+  </body>
+</html>

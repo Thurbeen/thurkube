@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quickstart — thurkube Docs</title>
+    <meta
+      name="description"
+      content="Install thurkube with Helm and apply your first AgentJob in five minutes."
+    />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/docs.css" />
+  </head>
+  <body>
+    <nav class="nav scrolled" id="nav">
+      <!-- prettier-ignore -->
+      <a href="../index.html" class="nav-brand">thur<span>kube</span></a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="../index.html#features">Features</a></li>
+        <li><a href="../index.html#installation">Install</a></li>
+        <li><a href="index.html" style="color: var(--text-primary)">Docs</a></li>
+        <li>
+          <a
+            href="https://github.com/Thurbeen/thurkube"
+            class="github-link"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg class="icon-github" viewBox="0 0 16 16">
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+            GitHub
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="docs-page">
+      <div class="docs-layout">
+        <aside class="docs-sidebar" id="docs-sidebar">
+          <h4>Getting Started</h4>
+          <ul>
+            <li><a href="quickstart.html" class="current-page">Quickstart</a></li>
+          </ul>
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="architecture.html">Architecture</a></li>
+            <li><a href="crd-reference.html">CRD Reference</a></li>
+          </ul>
+          <h4>On This Page</h4>
+          <ul>
+            <li><a href="#prereqs">Prerequisites</a></li>
+            <li><a href="#install">Install with Helm</a></li>
+            <li><a href="#secret">Create the Secret</a></li>
+            <li><a href="#define">Define the building blocks</a></li>
+            <li><a href="#run">Apply &amp; observe</a></li>
+            <li><a href="#cleanup">Cleanup</a></li>
+          </ul>
+        </aside>
+
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          &#9776;
+        </button>
+
+        <main class="docs-content">
+          <div class="breadcrumbs">
+            <a href="../index.html">Home</a>
+            <span class="separator">/</span>
+            <a href="index.html">Docs</a>
+            <span class="separator">/</span>
+            <span class="current">Quickstart</span>
+          </div>
+
+          <h1>Quickstart</h1>
+          <p>
+            From an empty cluster to a recurring agent run in five minutes. The example below
+            schedules a Claude Code agent that fixes failing PRs every six hours.
+          </p>
+
+          <h2 id="prereqs">
+            Prerequisites
+            <a href="#prereqs" class="heading-anchor">#</a>
+          </h2>
+          <ul>
+            <li>Kubernetes 1.28+ (kubectl context pointed at the target cluster)</li>
+            <li>Helm 3.16+</li>
+            <li>A Claude Code OAuth token in
+              <code>$CLAUDE_CODE_OAUTH_TOKEN</code>
+            </li>
+            <li>A GitHub PAT in
+              <code>$GH_TOKEN</code>
+            </li>
+          </ul>
+
+          <h2 id="install">
+            Install with Helm
+            <a href="#install" class="heading-anchor">#</a>
+          </h2>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">bash</span>
+            </div>
+            <div class="terminal-body">
+              <button
+                class="copy-btn"
+                data-code="helm install thurkube oci://ghcr.io/thurbeen/charts/thurkube --namespace thurkube-system --create-namespace"
+              >
+                Copy
+              </button>
+              <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">helm</span> install thurkube <span class="syn-url">oci://ghcr.io/thurbeen/charts/thurkube</span> \
+    <span class="syn-flag">--namespace</span> thurkube-system <span class="syn-flag">--create-namespace</span></code></pre>
+            </div>
+          </div>
+          <p>
+            Verify the controller pod is ready and the CRDs are established:
+          </p>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">bash</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> <span class="syn-flag">-n</span> thurkube-system get pods
+<span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> get crd <span class="syn-flag">-l</span> app.kubernetes.io/managed-by=Helm \
+    <span class="syn-flag">-o</span> name | <span class="syn-cmd">grep</span> thurkube.thurbeen.eu</code></pre>
+            </div>
+          </div>
+
+          <h2 id="secret">
+            Create the Secret
+            <a href="#secret" class="heading-anchor">#</a>
+          </h2>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">bash</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> create namespace agents
+<span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> <span class="syn-flag">-n</span> agents create secret generic claude-code-secrets \
+    <span class="syn-flag">--from-literal=</span>CLAUDE_CODE_OAUTH_TOKEN=<span class="syn-string">"$CLAUDE_CODE_OAUTH_TOKEN"</span> \
+    <span class="syn-flag">--from-literal=</span>GH_TOKEN=<span class="syn-string">"$GH_TOKEN"</span></code></pre>
+            </div>
+          </div>
+
+          <h2 id="define">
+            Define the building blocks
+            <a href="#define" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Save the manifest below to
+            <code>agent.yaml</code>
+            . It declares one
+            <code>AgentRuntime</code>
+            (the container image and mount conventions), an
+            <code>AgentAuth</code>
+            (the env-var-to-Secret wiring), an
+            <code>AgentRole</code>
+            (allowed tools), a
+            <code>Repository</code>
+            , and a scheduled
+            <code>AgentJob</code>
+            that ties them together.
+          </p>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">agent.yaml</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">AgentRuntime</span>
+<span class="syn-key">metadata</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">claude-code</span>, <span class="syn-key">namespace</span>: <span class="syn-value">agents</span> <span class="syn-bracket">}</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">image</span>: <span class="syn-value">ghcr.io/thurbeen/claude-code-job:latest</span>
+  <span class="syn-key">authEnvVar</span>: <span class="syn-value">CLAUDE_CODE_OAUTH_TOKEN</span>
+  <span class="syn-key">configPath</span>: <span class="syn-value">/etc/claude-code-job</span>
+  <span class="syn-key">persistPath</span>: <span class="syn-value">/var/lib/claude-code-job</span>
+<span class="syn-comment">---</span>
+<span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">AgentAuth</span>
+<span class="syn-key">metadata</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">claude-oauth</span>, <span class="syn-key">namespace</span>: <span class="syn-value">agents</span> <span class="syn-bracket">}</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">secretRef</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">claude-code-secrets</span>, <span class="syn-key">key</span>: <span class="syn-value">CLAUDE_CODE_OAUTH_TOKEN</span> <span class="syn-bracket">}</span>
+<span class="syn-comment">---</span>
+<span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">AgentRole</span>
+<span class="syn-key">metadata</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">default</span>, <span class="syn-key">namespace</span>: <span class="syn-value">agents</span> <span class="syn-bracket">}</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">allowedTools</span>: <span class="syn-bracket">[</span><span class="syn-value">Bash</span>, <span class="syn-value">Read</span>, <span class="syn-value">Edit</span>, <span class="syn-value">Write</span>, <span class="syn-value">Glob</span>, <span class="syn-value">Grep</span><span class="syn-bracket">]</span>
+<span class="syn-comment">---</span>
+<span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">Repository</span>
+<span class="syn-key">metadata</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">thurkube</span>, <span class="syn-key">namespace</span>: <span class="syn-value">agents</span> <span class="syn-bracket">}</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">owner</span>: <span class="syn-value">Thurbeen</span>
+  <span class="syn-key">name</span>:  <span class="syn-value">thurkube</span>
+  <span class="syn-key">tokenSecretRef</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">claude-code-secrets</span>, <span class="syn-key">key</span>: <span class="syn-value">GH_TOKEN</span> <span class="syn-bracket">}</span>
+<span class="syn-comment">---</span>
+<span class="syn-key">apiVersion</span>: <span class="syn-value">thurkube.thurbeen.eu/v1alpha1</span>
+<span class="syn-key">kind</span>: <span class="syn-value">AgentJob</span>
+<span class="syn-key">metadata</span>: <span class="syn-bracket">{</span> <span class="syn-key">name</span>: <span class="syn-value">pr-fixer</span>, <span class="syn-key">namespace</span>: <span class="syn-value">agents</span> <span class="syn-bracket">}</span>
+<span class="syn-key">spec</span>:
+  <span class="syn-key">schedule</span>: <span class="syn-string">"0 */6 * * *"</span>
+  <span class="syn-key">timezone</span>: <span class="syn-value">Europe/Paris</span>
+  <span class="syn-key">runtimeRef</span>:     <span class="syn-value">claude-code</span>
+  <span class="syn-key">authRef</span>:        <span class="syn-value">claude-oauth</span>
+  <span class="syn-key">roleRef</span>:        <span class="syn-value">default</span>
+  <span class="syn-key">repositoryRefs</span>: <span class="syn-bracket">[</span><span class="syn-value">thurkube</span><span class="syn-bracket">]</span>
+  <span class="syn-key">prompt</span>: <span class="syn-string">"Fix any failing PRs on this repository."</span>
+  <span class="syn-key">persist</span>: <span class="syn-keyword">true</span></code></pre>
+            </div>
+          </div>
+
+          <h2 id="run">
+            Apply &amp; observe
+            <a href="#run" class="heading-anchor">#</a>
+          </h2>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">bash</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> apply <span class="syn-flag">-f</span> agent.yaml
+<span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> <span class="syn-flag">-n</span> agents get aj <span class="syn-flag">-o</span> wide
+<span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> <span class="syn-flag">-n</span> agents describe aj pr-fixer
+<span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> <span class="syn-flag">-n</span> agents get cronjob,job,configmap,sa,pvc \
+    <span class="syn-flag">-l</span> thurkube.thurbeen.eu/agentjob=pr-fixer</code></pre>
+            </div>
+          </div>
+          <div class="info-box">
+            <p>
+              The
+              <code>Schedule</code>
+              ,
+              <code>Suspended</code>
+              ,
+              <code>Phase</code>
+              , and
+              <code>Last Run</code>
+              columns are declared as printer columns on the
+              <code>AgentJob</code>
+              CRD — no extra
+              <code>-o jsonpath</code>
+              required.
+            </p>
+          </div>
+
+          <h2 id="cleanup">
+            Cleanup
+            <a href="#cleanup" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Deleting the
+            <code>AgentJob</code>
+            triggers the controller's finalizer, which cascades to all owned children (CronJob, Job,
+            ConfigMap, ServiceAccount, PVC).
+          </p>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">bash</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-prompt">$</span> <span class="syn-cmd">kubectl</span> <span class="syn-flag">-n</span> agents delete aj pr-fixer
+<span class="syn-prompt">$</span> <span class="syn-cmd">helm</span> uninstall thurkube <span class="syn-flag">-n</span> thurkube-system</code></pre>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+  </body>
+</html>
