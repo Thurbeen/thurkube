@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Architecture — thurkube Docs</title>
+    <meta
+      name="description"
+      content="thurkube architecture: reconciler design, owned resources, drift detection, and the API group layout."
+    />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/docs.css" />
+  </head>
+  <body>
+    <nav class="nav scrolled" id="nav">
+      <!-- prettier-ignore -->
+      <a href="../index.html" class="nav-brand">thur<span>kube</span></a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="../index.html#features">Features</a></li>
+        <li><a href="../index.html#installation">Install</a></li>
+        <li><a href="index.html" style="color: var(--text-primary)">Docs</a></li>
+        <li>
+          <a
+            href="https://github.com/Thurbeen/thurkube"
+            class="github-link"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg class="icon-github" viewBox="0 0 16 16">
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+            GitHub
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="docs-page">
+      <div class="docs-layout">
+        <aside class="docs-sidebar" id="docs-sidebar">
+          <h4>Getting Started</h4>
+          <ul>
+            <li><a href="quickstart.html">Quickstart</a></li>
+          </ul>
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="architecture.html" class="current-page">Architecture</a></li>
+            <li><a href="crd-reference.html">CRD Reference</a></li>
+          </ul>
+          <h4>On This Page</h4>
+          <ul>
+            <li><a href="#why">Why a controller?</a></li>
+            <li><a href="#api-group">API group</a></li>
+            <li><a href="#reconciler">Reconciler loop</a></li>
+            <li><a href="#owned">Owned resources</a></li>
+            <li><a href="#drift">Drift detection</a></li>
+            <li><a href="#rbac">RBAC materialization</a></li>
+            <li><a href="#health">Health &amp; readiness</a></li>
+            <li><a href="#layout">Module layout</a></li>
+          </ul>
+        </aside>
+
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          &#9776;
+        </button>
+
+        <main class="docs-content">
+          <div class="breadcrumbs">
+            <a href="../index.html">Home</a>
+            <span class="separator">/</span>
+            <a href="index.html">Docs</a>
+            <span class="separator">/</span>
+            <span class="current">Architecture</span>
+          </div>
+
+          <h1>Architecture</h1>
+
+          <h2 id="why">
+            Why a controller?
+            <a href="#why" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            thurkube replaces the
+            <a href="https://argo-workflows.readthedocs.io/" target="_blank" rel="noopener">
+              Argo Workflows
+            </a>
+            -based agent orchestration in
+            <a href="https://github.com/Thurbeen/thurspace" target="_blank" rel="noopener">
+              thurspace
+            </a>
+            with a single, purpose-built operator. Argo Workflows is general-purpose; agent runs are
+            not. By collapsing the abstraction down to one CRD per agent run, the surface a user has
+            to learn shrinks from "templates, parameters, artifacts, retry strategies" to a flat
+            spec with named references.
+          </p>
+          <p>
+            The controller side handles everything that used to be repeated YAML: ConfigMap render,
+            ServiceAccount + RBAC creation, env-var wiring from Secrets, optional PVC, schedule
+            translation. Spec changes redeploy automatically via a
+            <code>configHash</code>
+            stored in
+            <code>.status</code>
+            .
+          </p>
+
+          <h2 id="api-group">
+            API group
+            <a href="#api-group" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            All eight CRDs live in
+            <code>thurkube.thurbeen.eu/v1alpha1</code>
+            and are namespaced. References between them are by name within the same namespace —
+            there is no cross-namespace addressing.
+          </p>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">api group</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-keyword">AgentJob</span>       <span class="syn-comment"># orchestration unit, references the others</span>
+<span class="syn-keyword">AgentRuntime</span>   <span class="syn-comment"># container image + mount conventions</span>
+<span class="syn-keyword">AgentAuth</span>      <span class="syn-comment"># Secret-key reference for the auth token</span>
+<span class="syn-keyword">AgentRole</span>      <span class="syn-comment"># allowedTools list</span>
+<span class="syn-keyword">AgentSkill</span>     <span class="syn-comment"># reusable skill from a GitHub repository</span>
+<span class="syn-keyword">McpServer</span>      <span class="syn-comment"># local command or remote URL</span>
+<span class="syn-keyword">Repository</span>     <span class="syn-comment"># GitHub repo + token</span>
+<span class="syn-keyword">ClusterAccess</span>  <span class="syn-comment"># RBAC rules → SA + ClusterRole + Binding</span></code></pre>
+            </div>
+          </div>
+
+          <h2 id="reconciler">
+            Reconciler loop
+            <a href="#reconciler" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            The controller is built on
+            <a href="https://github.com/kube-rs/kube" target="_blank" rel="noopener">kube-rs</a>
+            's
+            <code>Controller</code>
+            primitive with watchers on
+            <code>AgentJob</code>
+            and on every owned child kind. Reconcile is idempotent and runs on every change to the
+            parent or a watched child.
+          </p>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">reconcile flow</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code>watch <span class="syn-keyword">AgentJob</span> <span class="syn-flag">&rarr;</span> resolve refs
+  <span class="syn-flag">&rarr;</span> render ConfigMap (compute configHash)
+  <span class="syn-flag">&rarr;</span> apply ServiceAccount + RBAC (if ClusterAccess set)
+  <span class="syn-flag">&rarr;</span> apply PVC (if persist=true)
+  <span class="syn-flag">&rarr;</span> apply Job <span class="syn-comment">/</span> CronJob (server-side, fieldManager=thurkube)
+  <span class="syn-flag">&rarr;</span> patch .status: phase, lastRunTime, configHash, owned[]
+  <span class="syn-flag">&rarr;</span> requeue 5 min (steady) or 30 s (transient error)</code></pre>
+            </div>
+          </div>
+          <p>
+            <code>schedule</code>
+            present &rArr; emit a
+            <code>CronJob</code>
+            with the supplied
+            <code>timezone</code>
+            ;
+            <code>schedule</code>
+            absent &rArr; emit a one-shot
+            <code>Job</code>
+            . The shape of the underlying pod template is the same.
+          </p>
+
+          <h2 id="owned">
+            Owned resources
+            <a href="#owned" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            The controller watches and owns five child kinds. Each gets the standard label set so
+            you can list everything for a job in one query.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Child kind</th>
+                <th>Created when</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Job</code></td>
+                <td>
+                  <code>schedule</code>
+                  is unset
+                </td>
+                <td>One-shot agent run.</td>
+              </tr>
+              <tr>
+                <td><code>CronJob</code></td>
+                <td>
+                  <code>schedule</code>
+                  is set
+                </td>
+                <td>Recurring agent runs on the supplied cron expression.</td>
+              </tr>
+              <tr>
+                <td><code>ConfigMap</code></td>
+                <td>Always</td>
+                <td>
+                  Rendered runtime configuration mounted at the runtime's
+                  <code>configPath</code>
+                  .
+                </td>
+              </tr>
+              <tr>
+                <td><code>ServiceAccount</code></td>
+                <td>Always</td>
+                <td>Pod identity. Bound to a ClusterRole when ClusterAccess is set.</td>
+              </tr>
+              <tr>
+                <td><code>PersistentVolumeClaim</code></td>
+                <td>
+                  <code>persist: true</code>
+                </td>
+                <td>
+                  Mounted at the runtime's
+                  <code>persistPath</code>
+                  for cross-run state.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p>Standard labels applied to every child:</p>
+          <div class="terminal-frame">
+            <div class="terminal-header">
+              <div class="terminal-dot red"></div>
+              <div class="terminal-dot yellow"></div>
+              <div class="terminal-dot green"></div>
+              <span class="terminal-title">labels</span>
+            </div>
+            <div class="terminal-body">
+              <pre><code><span class="syn-key">app.kubernetes.io/managed-by</span>:           <span class="syn-value">thurkube</span>
+<span class="syn-key">thurkube.thurbeen.eu/agentjob</span>:          <span class="syn-value">&lt;name&gt;</span>
+<span class="syn-key">thurkube.thurbeen.eu/agentjob-namespace</span>: <span class="syn-value">&lt;ns&gt;</span>
+<span class="syn-key">thurkube.thurbeen.eu/owner-uid</span>:         <span class="syn-value">&lt;uid&gt;</span></code></pre>
+            </div>
+          </div>
+
+          <h2 id="drift">
+            Drift detection
+            <a href="#drift" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            Every reconcile hashes the rendered ConfigMap data and stores the digest in
+            <code>.status.configHash</code>
+            . When the hash changes, the controller redeploys the underlying Job/CronJob so a new
+            run picks up the new config. Cluster operators get a clean signal in
+            <code>kubectl describe</code>
+            without having to diff Pod specs.
+          </p>
+
+          <h2 id="rbac">
+            RBAC materialization
+            <a href="#rbac" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            When an
+            <code>AgentJob</code>
+            references a
+            <code>ClusterAccess</code>
+            , the controller materializes a per-job ServiceAccount, ClusterRole, and
+            ClusterRoleBinding from the supplied
+            <code>rules</code>
+            . That avoids leaking permissions across agent jobs and gives each job a least-privilege
+            identity scoped to exactly what its prompt needs.
+          </p>
+          <div class="info-box">
+            <p>
+              <code>ClusterAccess</code>
+              is a thin schema over Kubernetes'
+              <code>PolicyRule</code>
+              type — anything you can write in a ClusterRole, you can write here.
+            </p>
+          </div>
+
+          <h2 id="health">
+            Health &amp; readiness
+            <a href="#health" class="heading-anchor">#</a>
+          </h2>
+          <p>
+            The controller process exposes
+            <code>/healthz</code>
+            (always 200 once started) and
+            <code>/readyz</code>
+            (200 only after the first successful watcher init) on
+            <code>:8080</code>
+            . The Helm chart wires these into Kubernetes
+            <code>livenessProbe</code>
+            and
+            <code>readinessProbe</code>
+            via configurable port and intervals.
+          </p>
+          <p>
+            Logging uses
+            <code>tracing</code>
+            with a JSON formatter to stdout — pick it up with whatever logging stack the cluster
+            already runs. Set
+            <code>RUST_LOG</code>
+            (or
+            <code>logLevel</code>
+            in
+            <code>values.yaml</code>
+            ) to tune verbosity.
+          </p>
+
+          <h2 id="layout">
+            Module layout
+            <a href="#layout" class="heading-anchor">#</a>
+          </h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Module</th>
+                <th>Responsibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>src/main.rs</code></td>
+                <td>
+                  Entry point, CLI (
+                  <code>--crd</code>
+                  prints all CRDs as YAML), tokio runtime, signal handling.
+                </td>
+              </tr>
+              <tr>
+                <td><code>src/crd/</code></td>
+                <td>
+                  One file per CRD. Defines
+                  <code>*Spec</code>
+                  /
+                  <code>*Status</code>
+                  with
+                  <code>schemars</code>
+                  -derived JSON Schema.
+                </td>
+              </tr>
+              <tr>
+                <td><code>src/controller/</code></td>
+                <td>
+                  Reconciler entry (
+                  <code>mod.rs</code>
+                  ), the
+                  <code>AgentJob</code>
+                  reconcile (
+                  <code>agentjob.rs</code>
+                  ),
+                  <code>build.rs</code>
+                  for child resources,
+                  <code>resolve.rs</code>
+                  for ref lookup,
+                  <code>finalizer.rs</code>
+                  ,
+                  <code>status.rs</code>
+                  ,
+                  <code>context.rs</code>
+                  .
+                </td>
+              </tr>
+              <tr>
+                <td><code>src/health.rs</code></td>
+                <td>
+                  Hyper server for
+                  <code>/healthz</code>
+                  and
+                  <code>/readyz</code>
+                  .
+                </td>
+              </tr>
+              <tr>
+                <td><code>tests/architecture_rules.rs</code></td>
+                <td>Module isolation enforcement at test time.</td>
+              </tr>
+              <tr>
+                <td><code>tests/crd_schema.rs</code></td>
+                <td>CRD YAML validity and schema invariants.</td>
+              </tr>
+              <tr>
+                <td><code>tests/e2e.rs</code></td>
+                <td>
+                  Real-cluster lifecycle tests (
+                  <code>#[ignore]</code>
+                  , run with
+                  <code>--ignored</code>
+                  against k3d in CI).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </main>
+      </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+  </body>
+</html>
