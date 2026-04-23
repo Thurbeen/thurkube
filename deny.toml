@@ -1,5 +1,10 @@
 [advisories]
 version = 2
+ignore = [
+    # rustls-webpki 0.103.12: reachable panic in CRL parsing (patched in 0.103.13,
+    # not yet available as a transitive update — revisit when rustls-webpki bumps)
+    "RUSTSEC-2026-0104",
+]
 
 [licenses]
 version = 2
