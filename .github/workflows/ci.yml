@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
-      - uses: taiki-e/install-action@4c6626ce12acda2979b2e448bc5d52fb9ca3c767 # nextest
+      - uses: taiki-e/install-action@266c70280f3c5d9263cc8746538cd70e942e2dc3 # nextest
       - run: cargo nextest run --all --profile ci
 
   architecture:
